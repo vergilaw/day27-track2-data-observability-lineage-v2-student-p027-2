@@ -69,12 +69,20 @@ def detect_anomaly(
     `metric_name`, `known_event`, and `trend`.
     """
     if method == "mad":
-        return mad_detector(current, history)
-    if method in {"zscore", "auto"}:
-        result = zscore_detector(current, history, threshold=threshold)
-        if method == "auto":
-            result["method"] = "auto:zscore"
-            if context:
-                result["reason"] += "; context_ignored_by_starter=true"
+        return mad_detector(current, history, threshold=threshold)
+    if method == "zscore":
+        return zscore_detector(current, history, threshold=threshold)
+    if method == "auto":
+        context = context or {}
+        if context.get("known_event"):
+            return {"is_anomaly": False, "score": 0.0, "method": "auto:known_event", "reason": "ignored due to known event"}
+        
+        hist_to_use = context.get("same_segment_history", history)
+        
+        # Use MAD detector as a more robust default for auto mode
+        result = mad_detector(current, hist_to_use, threshold=threshold)
+        result["method"] = "auto:mad"
+        if context:
+            result["reason"] += f"; context_aware=true"
         return result
     raise ValueError(f"Unsupported method: {method}")
