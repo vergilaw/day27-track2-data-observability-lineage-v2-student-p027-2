@@ -5,18 +5,38 @@ models:
     description: Cleaned order records used by downstream marts.
     columns:
       - name: order_id
+        # `meta.upstream_columns` is what `observability.lineage.extract_dbt_column_graph`
+        # reads to build column-level lineage; dbt-core does not derive it itself.
+        meta:
+          upstream_columns: ['raw_orders.order_id']
         data_tests:
           - not_null
           - unique
       - name: customer_id
+        meta:
+          upstream_columns: ['raw_orders.customer_id']
+        data_tests:
+          - not_null
+      - name: amount_usd
+        meta:
+          upstream_columns: ['raw_orders.amount']
+        data_tests:
+          - not_null
+      - name: order_date
+        meta:
+          upstream_columns: ['raw_orders.created_at']
         data_tests:
           - not_null
       - name: currency
+        meta:
+          upstream_columns: ['raw_orders.currency']
         data_tests:
           - accepted_values:
               arguments:
                 values: ['USD', 'VND']
       - name: status
+        meta:
+          upstream_columns: ['raw_orders.status']
         data_tests:
           - accepted_values:
               arguments:
@@ -25,5 +45,10 @@ models:
   - name: stg_customers
     columns:
       - name: customer_id
+        meta:
+          upstream_columns: ['raw_customers.customer_id']
         data_tests:
           - not_null
+      - name: is_active
+        meta:
+          upstream_columns: ['raw_customers.is_active']

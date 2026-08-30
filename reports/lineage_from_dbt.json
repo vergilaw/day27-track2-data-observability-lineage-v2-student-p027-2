@@ -1,0 +1,75 @@
+{
+  "dataset_lineage": {
+    "raw_customers": [
+      "stg_customers"
+    ],
+    "stg_orders": [
+      "fct_daily_revenue"
+    ],
+    "stg_customers": [
+      "fct_daily_revenue"
+    ],
+    "fct_daily_revenue": [
+      "ceo_revenue_dashboard"
+    ],
+    "raw_orders": [
+      "stg_orders"
+    ],
+    "kb_documents": [
+      "kb_active_docs"
+    ],
+    "kb_active_docs": [
+      "rag_index"
+    ],
+    "rag_index": [
+      "support_agent"
+    ]
+  },
+  "column_lineage": {
+    "raw_orders.order_id": [
+      "stg_orders.order_id"
+    ],
+    "raw_orders.customer_id": [
+      "stg_orders.customer_id"
+    ],
+    "raw_orders.amount": [
+      "stg_orders.amount_usd"
+    ],
+    "raw_orders.created_at": [
+      "stg_orders.order_date"
+    ],
+    "raw_orders.currency": [
+      "stg_orders.currency"
+    ],
+    "raw_orders.status": [
+      "stg_orders.status"
+    ],
+    "raw_customers.customer_id": [
+      "stg_customers.customer_id"
+    ],
+    "raw_customers.is_active": [
+      "stg_customers.is_active"
+    ],
+    "stg_orders.order_date": [
+      "fct_daily_revenue.order_date"
+    ],
+    "stg_orders.order_id": [
+      "fct_daily_revenue.completed_order_rows"
+    ],
+    "stg_orders.amount_usd": [
+      "fct_daily_revenue.daily_revenue"
+    ],
+    "fct_daily_revenue.daily_revenue": [
+      "ceo_revenue_dashboard.revenue"
+    ],
+    "kb_documents.content": [
+      "kb_active_docs.content"
+    ],
+    "kb_active_docs.content": [
+      "rag_index.embedding"
+    ],
+    "rag_index.embedding": [
+      "support_agent.answer"
+    ]
+  }
+}

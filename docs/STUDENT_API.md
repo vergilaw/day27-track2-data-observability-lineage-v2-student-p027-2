@@ -87,3 +87,28 @@ Return anomaly dictionary.
 Return anomaly dictionary.
 
 > Hidden tests không yêu cầu một tool cụ thể. Có thể dùng GX/Soda/Elementary/OpenLineage bên trong miễn interface và behavior đúng.
+
+---
+
+## Helper bổ sung (không bắt buộc cho hidden test)
+
+Hidden evaluation chỉ gọi 9 hàm ở trên. Các helper dưới đây được thêm vào cùng module,
+không thay đổi signature/return shape của stable API:
+
+| Hàm | Module | Dùng để |
+|---|---|---|
+| `decide_action(issues)` | `src.contract_validator` | Quyết định cấp batch: `block` / `quarantine` / `warn` / `pass` |
+| `split_quarantine(df, contract)` | `src.contract_validator` | Tách `(clean_rows, quarantined_rows)` theo rule cấp dòng |
+| `evaluate_freshness(df, contract, now=None)` | `src.contract_validator` | Freshness riêng lẻ, cho phép truyền `now` để test |
+| `ewma_detector(...)` | `observability.anomaly` | Baseline theo xu hướng |
+| `evaluate_burn_windows({'5m': .., '1h': ..})` | `observability.slo` | Multi-window với >2 cửa sổ |
+| `get_upstream_assets` / `get_column_upstream` | `observability.lineage` | Truy ngược tìm root cause |
+| `blast_radius(payload, start, column=...)` | `observability.lineage` | Dataset + column + terminal consumers |
+| `extract_dbt_dataset_graph` / `extract_dbt_column_graph` | `observability.lineage` | Dựng lineage từ `target/manifest.json` |
+| `to_openlineage_events` / `write_openlineage_events` | `observability.lineage` | Phát OpenLineage RunEvent kèm facet `columnLineage` |
+| `detect_embedding_shift(vectors, baseline)` | `observability.rag_metrics` | Drift theo cosine với centroid (khi có vector thật) |
+| `evaluate_retrieval(retrieved, relevant, k)` | `observability.rag_metrics` | recall@k / precision@k / MRR |
+| `run_orders_checkpoint(df, ...)` | `gx.validate_orders` | Chạy full GX Checkpoint, trả payload quyết định |
+
+Mọi return dict của stable API đều **giữ nguyên các key bắt buộc** và chỉ bổ sung key mới
+(ví dụ `action` trong contract issue, `psi`/`ks_pvalue` trong distribution result).

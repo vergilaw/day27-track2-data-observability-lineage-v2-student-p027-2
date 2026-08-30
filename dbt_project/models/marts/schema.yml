@@ -5,9 +5,20 @@ models:
     description: Daily completed-order revenue for the CEO dashboard.
     columns:
       - name: order_date
+        # `meta.upstream_columns` is what `observability.lineage.extract_dbt_column_graph`
+        # reads to build column-level lineage; dbt-core does not derive it itself.
+        meta:
+          upstream_columns: ['stg_orders.order_date']
         data_tests:
           - not_null
           - unique
+      - name: completed_order_rows
+        meta:
+          upstream_columns: ['stg_orders.order_id']
+        data_tests:
+          - not_null
       - name: daily_revenue
+        meta:
+          upstream_columns: ['stg_orders.amount_usd']
         data_tests:
           - not_null

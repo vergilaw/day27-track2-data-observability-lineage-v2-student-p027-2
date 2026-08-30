@@ -1,0 +1,51 @@
+unit_tests:
+  # Happy path: the aggregation itself is correct.
+  - name: completed_orders_sum_to_expected_revenue
+    model: fct_daily_revenue
+    description: One active customer, two completed orders - revenue is the plain sum.
+    given:
+      - input: ref('stg_orders')
+        rows:
+          - {order_id: 1, customer_id: C0001, amount_usd: 100.0, status: completed, order_date: '2026-08-01'}
+          - {order_id: 2, customer_id: C0001, amount_usd: 70.0, status: completed, order_date: '2026-08-01'}
+      - input: ref('stg_customers')
+        rows:
+          - {customer_id: C0001, is_active: true, valid_from: '2026-01-01', valid_to: null}
+    expect:
+      rows:
+        - {order_date: '2026-08-01', completed_order_rows: 2, daily_revenue: 170.0}
+
+  # The transformation bug the lab is about: two *active* SCD rows for the same
+  # customer fan the join out and double the revenue. This test fails against a
+  # direct join to stg_customers and passes once the dimension is deduplicated.
+  - name: duplicate_active_customer_does_not_inflate_revenue
+    model: fct_daily_revenue
+    description: Two active dimension rows for one customer must not double revenue.
+    given:
+      - input: ref('stg_orders')
+        rows:
+          - {order_id: 1, customer_id: C0001, amount_usd: 100.0, status: completed, order_date: '2026-08-01'}
+      - input: ref('stg_customers')
+        rows:
+          - {customer_id: C0001, is_active: true, valid_from: '2026-01-01', valid_to: '2026-06-01'}
+          - {customer_id: C0001, is_active: true, valid_from: '2026-06-01', valid_to: null}
+    expect:
+      rows:
+        - {order_date: '2026-08-01', completed_order_rows: 1, daily_revenue: 100.0}
+
+  # Non-completed orders must never reach the revenue mart.
+  - name: only_completed_orders_count_towards_revenue
+    model: fct_daily_revenue
+    description: pending / refunded / cancelled rows are excluded from the mart.
+    given:
+      - input: ref('stg_orders')
+        rows:
+          - {order_id: 1, customer_id: C0001, amount_usd: 100.0, status: completed, order_date: '2026-08-01'}
+          - {order_id: 2, customer_id: C0001, amount_usd: 999.0, status: refunded, order_date: '2026-08-01'}
+          - {order_id: 3, customer_id: C0001, amount_usd: 999.0, status: pending, order_date: '2026-08-01'}
+      - input: ref('stg_customers')
+        rows:
+          - {customer_id: C0001, is_active: true, valid_from: '2026-01-01', valid_to: null}
+    expect:
+      rows:
+        - {order_date: '2026-08-01', completed_order_rows: 1, daily_revenue: 100.0}

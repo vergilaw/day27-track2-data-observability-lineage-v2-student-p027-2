@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-08-30T02:04:05.577113+00:00",
+  "checkpoint_success": true,
+  "expectations_evaluated": 20,
+  "failed_expectations": 0,
+  "decision": "pass",
+  "reason": "all expectations passed",
+  "severity_counts": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0
+  },
+  "failures": []
+}

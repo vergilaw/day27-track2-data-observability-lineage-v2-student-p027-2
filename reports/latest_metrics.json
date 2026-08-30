@@ -1,22 +1,106 @@
 {
-  "timestamp": "2026-08-29T05:41:23.305648+00:00",
+  "timestamp": "2026-08-30T02:04:47.256876+00:00",
   "orders_rows": 600,
   "failed_contract_checks": 0,
   "critical_contract_failures": 0,
+  "contract_decision": {
+    "action": "pass",
+    "reason": "all contract checks passed",
+    "failed_checks": 0,
+    "critical_failures": 0,
+    "failed_check_names": []
+  },
+  "quarantine": {
+    "clean_rows": 600,
+    "quarantined_rows": 0
+  },
   "row_count_anomaly": {
     "is_anomaly": true,
-    "score": 18.751099999999997,
+    "score": 22.798099999999998,
     "method": "auto:mad",
-    "reason": "median=252.500, mad=12.500, threshold=3.0; context_aware=true"
+    "reason": "baseline=same_segment(n=6); median=262.000, mad=10.000, threshold=3.5; volume_spike: 229% of median 262.0",
+    "baseline": "same_segment",
+    "metric_name": "row_count"
   },
-  "freshness_minutes": 5.0215522,
+  "row_count_anomaly_naive_zscore": {
+    "is_anomaly": false,
+    "score": 0.695262403736945,
+    "method": "zscore",
+    "reason": "mean=494.571, std=151.639, threshold=3.0"
+  },
+  "amount_distribution_shift": {
+    "is_anomaly": false,
+    "score": 0.0,
+    "method": "psi_ks_robust",
+    "reason": "stable: psi=0.000, ks_D=0.000, ks_p=1.000, ratio=1.00 | n_current=600, n_baseline=600",
+    "psi": 0.0,
+    "ks_statistic": 0.0,
+    "ks_pvalue": 1.0,
+    "robust_ratio": 1.0,
+    "current_median": 57.650000000000006,
+    "baseline_median": 57.650000000000006,
+    "verdict": "stable"
+  },
+  "freshness_minutes": 5.737553316666666,
+  "kb_age_minutes": 10.728090333333334,
+  "kb_contract_decision": {
+    "action": "pass",
+    "reason": "all contract checks passed",
+    "failed_checks": 0,
+    "critical_failures": 0,
+    "failed_check_names": []
+  },
+  "kb_failed_contract_checks": [],
+  "kb_blast_radius": {
+    "start": "kb_documents",
+    "downstream_assets": [
+      "kb_active_docs",
+      "rag_index",
+      "support_agent"
+    ],
+    "upstream_assets": [],
+    "impacted_count": 3,
+    "terminal_consumers": [
+      "support_agent"
+    ],
+    "start_column": "kb_documents.content",
+    "downstream_columns": [
+      "kb_active_docs.content",
+      "rag_index.embedding",
+      "support_agent.answer"
+    ],
+    "column_impacted_datasets": [
+      "kb_active_docs",
+      "rag_index",
+      "support_agent"
+    ]
+  },
   "kb_text_length_signal": {
     "is_anomaly": false,
-    "score": 0.7547940916996035,
-    "method": "zscore",
-    "reason": "mean=14.834, std=1.015, threshold=3.0",
+    "score": 0.8974279661016953,
+    "method": "text_length:mad",
+    "reason": "median=14.815, mad=0.590, threshold=3.0",
     "metric": "mean_text_length",
-    "current_mean": 15.6
+    "current_mean": 15.6,
+    "baseline_median": 14.815,
+    "ratio_vs_baseline": 1.0529868376645293,
+    "min_length": 13,
+    "empty_doc_ratio": 0.0
+  },
+  "kb_embedding_norm_signal": {
+    "is_anomaly": false,
+    "score": 0.481171974522291,
+    "method": "embedding_norm:mad+psi_ks",
+    "reason": "stable: median 0.9968 vs baseline 1.0080 (shift=1.1%)",
+    "metric": "embedding_norm_median",
+    "current_median": 0.9968,
+    "baseline_median": 1.008,
+    "current_mean": 0.9968,
+    "baseline_mean": 1.0069121951219513,
+    "relative_shift": 0.0111111111111111,
+    "baseline_relative_spread": 0.015575396825396872,
+    "psi": 7.101214052680725,
+    "ks_pvalue": 0.5882098349980948
   },
   "contract_slo": {
     "target": 0.999,
@@ -24,10 +108,59 @@
     "allowed_bad_rate": 0.0010000000000000009,
     "burn_rate": 0.0,
     "remaining_error_budget_fraction": 1.0,
+    "error_budget_events": 0.0010000000000000009,
+    "hours_to_exhaustion": null,
     "breached": false
+  },
+  "multiwindow_burn": {
+    "policy": "sre_multiwindow",
+    "short_window_burn": 0.0,
+    "long_window_burn": 0.0,
+    "thresholds": [
+      14.4,
+      6.0,
+      3.0,
+      1.0
+    ],
+    "page": false,
+    "severity": "info",
+    "action": "none",
+    "burn_rate_threshold": 1.0,
+    "reason": "healthy: short=0.00 and long=0.00 below all burn-rate thresholds",
+    "sli": "daily null_rate <= 0.008",
+    "windows_days": {
+      "short": 3,
+      "long": 14
+    }
   },
   "sample_blast_radius_from_stg_orders": [
     "fct_daily_revenue",
     "ceo_revenue_dashboard"
-  ]
+  ],
+  "blast_radius": {
+    "start": "stg_orders",
+    "downstream_assets": [
+      "fct_daily_revenue",
+      "ceo_revenue_dashboard"
+    ],
+    "upstream_assets": [
+      "raw_orders"
+    ],
+    "impacted_count": 2,
+    "terminal_consumers": [
+      "ceo_revenue_dashboard"
+    ],
+    "start_column": "raw_orders.amount",
+    "downstream_columns": [
+      "stg_orders.amount_usd",
+      "fct_daily_revenue.daily_revenue",
+      "ceo_revenue_dashboard.revenue"
+    ],
+    "column_impacted_datasets": [
+      "stg_orders",
+      "fct_daily_revenue",
+      "ceo_revenue_dashboard"
+    ]
+  },
+  "openlineage_events": "reports/openlineage_events.jsonl"
 }

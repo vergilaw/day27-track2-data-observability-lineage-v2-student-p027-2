@@ -46,7 +46,13 @@ pip install -r requirements.txt
 
 make reset
 make baseline
-pytest tests_public -q
+make tests          # pytest tests_public tests -q
+```
+
+Verify toàn bộ trong một lệnh:
+
+```bash
+make check          # reset -> baseline -> gx -> dbt -> lineage -> tests
 ```
 
 Chạy dbt:
@@ -59,6 +65,12 @@ Chạy Great Expectations example:
 
 ```bash
 make gx
+```
+
+Dựng lineage từ dbt manifest (chạy sau `make dbt`):
+
+```bash
+make lineage
 ```
 
 Dashboard:
@@ -103,21 +115,25 @@ Reset về trạng thái khỏe:
 make reset
 ```
 
-## 5. Những phần cần hoàn thiện
+## 5. Trạng thái hoàn thiện
 
-Xem chi tiết trong `docs/LAB_GUIDE.md`.
+Chi tiết thiết kế, trade-off và cách verify từng phần: **`docs/SOLUTION.md`**.
 
-Các TODO quan trọng:
+| Phần | Trạng thái |
+|---|---|
+| `src/contract_validator.py` — type, freshness (wall clock + batch lag), severity → action, quarantine | ✅ |
+| `gx/validate_orders.py` — Suite sinh từ contract → ValidationDefinition → Checkpoint → severity-routing Action | ✅ |
+| `dbt_project/` — 3 unit test, 3 singular test, model chống fan-out của SCD | ✅ |
+| `observability/anomaly.py` — MAD + MeanAD fallback, same-weekday baseline, EWMA, known_event | ✅ |
+| `observability/distribution.py` — PSI + KS + robust ratio (thay mean ratio) | ✅ |
+| `observability/slo.py` — multi-window multi-burn-rate theo SRE Workbook | ✅ |
+| `observability/lineage.py` — column lineage transitive, dbt manifest, OpenLineage events | ✅ |
+| `observability/rag_metrics.py` — embedding norm/centroid drift, retrieval metrics | ✅ |
+| `reports/incident_report.md`, `reports/agent_log.md` | ✅ |
+| Phase 6 mystery incident (dataset do giảng viên cung cấp) | ⏳ chờ dataset |
 
-- `src/contract_validator.py`: type checking, freshness, severity/action.
-- `gx/validate_orders.py`: expectation đơn lẻ → Suite/ValidationDefinition/Checkpoint/Actions.
-- `dbt_project/`: thêm singular data test + dbt unit test cho join/SCD.
-- `observability/anomaly.py`: robust baseline, seasonality, MAD/EWMA.
-- `observability/distribution.py`: distribution drift tốt hơn mean ratio.
-- `observability/slo.py`: multi-window burn-rate policy.
-- `observability/lineage.py`: column lineage / OpenLineage optional.
-- `observability/rag_metrics.py`: embedding drift / retrieval metrics optional.
-- `reports/incident_report.md`: incident report cuối lab.
+35 regression test trong `tests/` mô tả đúng failure mà starter code bỏ sót
+(z-score bị outlier che mắt, MAD = 0, column lineage không transitive, transient spike gây page…).
 
 ## 6. Hidden evaluation
 

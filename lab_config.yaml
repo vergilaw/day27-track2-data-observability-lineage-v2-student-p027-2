@@ -9,6 +9,12 @@ slo:
   rag_index_freshness:
     target: 0.99
     threshold_minutes: 60
+  # Data-quality SLI used by the multi-window burn-rate policy in run_baseline.
+  order_null_rate:
+    target: 0.99
+    max_null_rate: 0.008
+    short_window_days: 3
+    long_window_days: 14
 
 anomaly:
   default_method: zscore
